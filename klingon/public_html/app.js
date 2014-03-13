@@ -295,47 +295,31 @@ function checkifBandLiked(likedList , uuid){
     }
 }
 
-app.get('/user/:id/timeline/:uuid', function(req, res) {
-    
-    
+app.put('/user/:id/drawing/:uuid', function(req, res) {
+    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
+        var userId = req.param('id');
+        var bandId = req.param('uuid');
+
+        if (err)
+            throw err;
+
+        var collection = db.collection('bands');
+
+        collection.update(
+                {_id: bandId},
+        {
+            $addToSet: {"drawing":userId}
+        }, function(err, records) {
+            if (err) {
+                return res.status(400).send("Failed");
+            }
+            return res.send("Successfully entered the drawign");
+        });
+
+    });
     
 });
 
-
-app.get('/data', function(req, res) {
-    
-    
-    var options = {
-                            host: 'api.openaura.com',
-                            path: '/v1/info/artists/1?id_type=oa%3Aartist_id&api_key=hack-sxsw',
-                            method: 'GET'
-                        };
-
-                        var openAura = http.request(options, function(response) {
-//                            if(error){
-//                                console.log(error);
-//                                return res.send("aura error : "+ error);
-//                                
-//                            }
-                            console.log(options.path);
-                            response.setEncoding('utf-8');
-                            //console.log(index);
-                            var responseString = '';
-
-                            response.on('data', function(data) {
-                                responseString += data;
-                            });
-                            response.on('error' , function(e){
-                                console.log(e);
-                            });
-                            response.on('end', function() {
-                                var responseObject = JSON.parse(responseString);
-                                console.log(responseObject.profile_photo.media[0].url);
-                            });
-                        });
-                        openAura.write("");
-                        openAura.end();
-});
 
 
 
