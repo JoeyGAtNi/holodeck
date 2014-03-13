@@ -116,10 +116,10 @@ app.get('/user/:id/timeline', function(req, res) {
             }
             likedList = results.liked;
             visitedList = results.visited;
-            if (visitedList) {
+            if (visitedList == null) {
                 return res.status(200).send("No bands visited");
             }
-
+            console.log(visitedList);
             var bandcollection;
             for (var i = 0; i < visitedList.length; i++) {
 
