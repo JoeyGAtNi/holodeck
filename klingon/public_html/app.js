@@ -116,7 +116,7 @@ app.get('/user/:id/timeline', function(req, res) {
             }
             likedList = results.liked;
             visitedList = results.visited;
-            if (visitedList === null) {
+            if (visitedList) {
                 return res.status(200).send("No bands visited");
             }
 
@@ -141,7 +141,9 @@ app.get('/user/:id/timeline', function(req, res) {
                             method: 'GET'
                         };
 
-                        var openAura = http.request(options, function(response) {
+                        var openAura = http.request(options, function(err , response) {
+                            if(err)
+                                return res.status(500).send("failed with " + err);
                             response.setEncoding('utf-8');
                             //console.log(index);
                             var responseString = '';
