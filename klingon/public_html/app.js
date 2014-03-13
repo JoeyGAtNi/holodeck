@@ -97,9 +97,10 @@ app.put('/user/:id/liked/:uuid', function(req, res) {
 
 
 app.get('/user/:id/timeline', function(req, res) {
-    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
-        if (err)
-            throw err;
+    'use strict';
+    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(dberr, db) {
+        if (dberr)
+            throw dberr;
 
         var userId = req.param('id');
 
@@ -107,8 +108,8 @@ app.get('/user/:id/timeline', function(req, res) {
         var visitedList;
         var likedList;
 
-        collection.findOne({"_id": userId}, function(err, results) {
-            if (err) {
+        collection.findOne({"_id": userId}, function(collerr, results) {
+            if (collerr) {
                 return res.status(400).send("Failed");
             }
             if(results == null){
@@ -129,8 +130,10 @@ app.get('/user/:id/timeline', function(req, res) {
                 var index = 0;
                 bandcollection.findOne({"_id": visitedList[i].uuid}, function(err, result) {
 
-                    if (err)
-                        return res.status(500).send("failed with " + err);
+                    if (err){
+                        console.log(err.message);
+                        return res.status(500).send("error : " + err);
+                    }
                     if (result)
                     {
                         console.log("in result");
@@ -141,9 +144,13 @@ app.get('/user/:id/timeline', function(req, res) {
                             method: 'GET'
                         };
 
-                        var openAura = http.request(options, function(err , response) {
-                            if(err)
-                                return res.status(500).send("failed with " + err.message);
+                        var openAura = http.request(options, function( response) {
+//                            if(error){
+//                                console.log(error);
+//                                return res.send("aura error : "+ error);
+//                                
+//                            }
+                            console.log(options.path);
                             response.setEncoding('utf-8');
                             //console.log(index);
                             var responseString = '';
@@ -156,7 +163,7 @@ app.get('/user/:id/timeline', function(req, res) {
                             });
                             response.on('end', function() {
                                 var responseObject = JSON.parse(responseString);
-                               // console.log(responseObject.oa_anchor_id);
+                                //console.log(responseObject);
                                 var like= false;
                                 if(likedList != null){
                                         like=checkifBandLiked(likedList ,visitedList[index].uuid );
@@ -175,7 +182,7 @@ app.get('/user/:id/timeline', function(req, res) {
                                 headline: "", links: "", isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
                                 }else{
-                                    console.log(responseObject);
+                                    //console.log(responseObject);
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[0].url,
                                     headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
@@ -189,6 +196,7 @@ app.get('/user/:id/timeline', function(req, res) {
                             });
                             
                         });
+                       
                         openAura.write("");
                         openAura.end();
 
@@ -214,29 +222,41 @@ function checkifBandLiked(likedList , uuid){
 
 app.get('/data', function(req, res) {
     
-    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
-        if (err)
-            throw err;
-        var bandcollection = db.collection('bands');
-        var str = "";
-        var index =0;
-        bandcollection.find().toArray(function(err, results) {  
-            
-                    if(err) 
-                        return res.status(500).send("failed with "+err);
-                    for(var i = 0 ; i < results.length ; i++){
-                        str += results[i].aura_id;
-                        
-                        if(i == results.length-1)
-                            return res.send(str);
-                    }
-                    
-        db.close();
-                    
-        });
-        //res.send("str = "+str);
-    });
+    
+    var options = {
+                            host: 'api.openaura.com',
+                            path: '/v1/info/artists/1?id_type=oa%3Aartist_id&api_key=hack-sxsw',
+                            method: 'GET'
+                        };
+
+                        var openAura = http.request(options, function(response) {
+//                            if(error){
+//                                console.log(error);
+//                                return res.send("aura error : "+ error);
+//                                
+//                            }
+                            console.log(options.path);
+                            response.setEncoding('utf-8');
+                            //console.log(index);
+                            var responseString = '';
+
+                            response.on('data', function(data) {
+                                responseString += data;
+                            });
+                            response.on('error' , function(e){
+                                console.log(e);
+                            });
+                            response.on('end', function() {
+                                var responseObject = JSON.parse(responseString);
+                                console.log(responseObject.profile_photo.media[0].url);
+                            });
+                        });
+                        openAura.write("");
+                        openAura.end();
 });
+
+
+
 
 
 
