@@ -99,7 +99,7 @@ app.get('/user/:id/timeline', function(req, res) {
 
         var collection = db.collection('crowd');
         var visitedList;
-
+        var likedList;
 
         collection.findOne({"_id": userId}, function(err, results) {
             if (err) {
@@ -108,6 +108,7 @@ app.get('/user/:id/timeline', function(req, res) {
             if(results == null){
                 return res.status(404).send("no band visits");
             }
+            likedList = results.liked;
             visitedList = results.visited;
             if (visitedList === null) {
                 return res.status(200).send("No bands visited");
@@ -147,9 +148,12 @@ app.get('/user/:id/timeline', function(req, res) {
                                 //console.log(responseString);
                                 var responseObject = JSON.parse(responseString);
                                 console.log(responseObject.oa_anchor_id);
-
+                                var like= false;
+                                if(likedList != null){
+                                        like=checkifBandLiked(likedList ,visitedList[index].uuid );
+                                }
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[2].url,
-                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: true});
+                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like});
                                 if (index == visitedList.length - 1) {
                                     //console.log(timelineObjects);
                                     return res.send(timelineObjects);
@@ -170,6 +174,13 @@ app.get('/user/:id/timeline', function(req, res) {
         });
     });
 });
+
+function checkifBandLiked(likedList , uuid){
+    for(var i= 0 ; i < likedList.length ; i++){
+        if(likedList[i].uuid === uuid)
+            return true;
+    }
+}
 
 app.get('/data', function(req, res) {
     
