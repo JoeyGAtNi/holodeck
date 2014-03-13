@@ -152,8 +152,13 @@ app.get('/user/:id/timeline', function(req, res) {
                                 if(likedList != null){
                                         like=checkifBandLiked(likedList ,visitedList[index].uuid );
                                 }
+                                var spotifyUrl ="";
+                                if(result.spotify_track_id != null){
+                                    spotifyUrl = "<iframe src='https://embed.spotify.com/?uri="+result.spotify_track_id+"' width='250' height='80' frameborder='0' allowtransparency='true'></iframe>";
+                                }
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[2].url,
-                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like});
+                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like ,
+                                spotify_track_id : spotifyUrl});
                                 if (index == visitedList.length - 1) {
                                     //console.log(timelineObjects);
                                     return res.send(timelineObjects);
