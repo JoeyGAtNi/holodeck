@@ -2,16 +2,18 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var http = require('http');
-
+var path = require('path');
 var MongoClient = require('mongodb').MongoClient
         , format = require('util').format;
 
 
 server.listen(3000);
 
-app.use(express.logger('dev'));
+
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+//app.use(express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(app.router);
 
 app.all('*', function(req, res, next) {
@@ -20,9 +22,10 @@ app.all('*', function(req, res, next) {
   next();
  });
 
-//app.use(express.static(__dirname + '/public'));
-
-
+app.use(express.logger('dev'));
+app.get('/', function(req, res) {
+    res.sendfile(__dirname + '/index.html');
+});
 
 app.post('/user', function(req, res) {
     MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
@@ -101,7 +104,8 @@ app.put('/user/:id/visited/:uuid', function(req, res) {
                                 
                                 var spotifyUrl ="";
                                 if(result.spotify_track_id != null){
-                                    spotifyUrl = "<iframe src='https://embed.spotify.com/?uri="+result.spotify_track_id+"' width='250' height='80' frameborder='0' allowtransparency='true'></iframe>";
+                                    //spotifyUrl = "<iframe src='https://embed.spotify.com/?uri="+result.spotify_track_id+"' width='250' height='80' frameborder='0' allowtransparency='true'></iframe>";
+                                    spotifyUrl = "https://embed.spotify.com/?uri="+result.spotify_track_id;
                                 }
                                 var bandsInTown = "";
                                 if(result.bands_in_town != null)
