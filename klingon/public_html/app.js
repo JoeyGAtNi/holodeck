@@ -166,9 +166,15 @@ app.get('/user/:id/timeline', function(req, res) {
                                 if(result.bands_in_town != null)
                                     bandsInTown = result.bands_in_town;
                                 console.log(responseObject.profile_photo);
+                                if(responseObject == null){
+                                timelineObjects.push({timestamp: visitedList[index].timestamp, image: "",
+                                headline: "", links: "", isLiked: like ,
+                                spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
+                                }else{
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[0].url,
                                     headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
+                                }
                                 if (index == visitedList.length - 1) {
                                     //console.log(timelineObjects);
                                     return res.send(timelineObjects);
