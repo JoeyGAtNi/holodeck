@@ -131,9 +131,9 @@ app.get('/user/:id/timeline', function(req, res) {
 
                     if (err)
                         return res.status(500).send("failed with " + err);
-                    if (result != null)
+                    if (result)
                     {
-
+                        console.log("in result");
 
                         var options = {
                             host: 'api.openaura.com',
@@ -149,11 +149,12 @@ app.get('/user/:id/timeline', function(req, res) {
                             response.on('data', function(data) {
                                 responseString += data;
                             });
-
+                            response.on('error' , function(e){
+                                console.log(e);
+                            });
                             response.on('end', function() {
-                                //console.log(responseString);
                                 var responseObject = JSON.parse(responseString);
-                                console.log(responseObject.oa_anchor_id);
+                               // console.log(responseObject.oa_anchor_id);
                                 var like= false;
                                 if(likedList != null){
                                         like=checkifBandLiked(likedList ,visitedList[index].uuid );
@@ -165,8 +166,9 @@ app.get('/user/:id/timeline', function(req, res) {
                                 var bandsInTown = "";
                                 if(result.bands_in_town != null)
                                     bandsInTown = result.bands_in_town;
-                                console.log(responseObject.profile_photo);
-                                if(responseObject == null){
+                                
+                                if(responseObject == ""){
+                                    
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: "",
                                 headline: "", links: "", isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
@@ -186,6 +188,10 @@ app.get('/user/:id/timeline', function(req, res) {
                         });
                         openAura.write("");
                         openAura.end();
+
+                    }else{
+                        console.log("no result");
+                        index++;
 
                     }
 
