@@ -50,21 +50,93 @@ app.put('/user/:id/visited/:uuid', function(req, res) {
     MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
         var userId = req.param('id');
         var bandId = req.param('uuid');
-
+        var timelineObjects=[];
         if (err)
             throw err;
-
+        var currentTime = new Date().getTime();
         var collection = db.collection('crowd');
-
+        var bandcollection;
         collection.update(
                 {_id: userId},
         {
-            $addToSet: {"visited": {"uuid": bandId, "timestamp": new Date().getTime()}}
+            $addToSet: {"visited": {"uuid": bandId, "timestamp": currentTime}}
         }, function(err, records) {
             if (err) {
                 return res.status(400).send("Failed");
             }
-            return res.send("Visited added");
+            bandcollection = db.collection("bands");
+            bandcollection.findOne({"_id": bandId}, function(err, result) {
+
+                    if (err){
+                        console.log(err.message);
+                        return res.status(500).send("error : " + err);
+                    }
+                    if (result)
+                    {
+                        console.log("in result");
+
+                        var options = {
+                            host: 'api.openaura.com',
+                            path: '/v1/info/artists/' + result.aura_id + '?id_type=oa%3Aartist_id&api_key=hack-sxsw',
+                            method: 'GET'
+                        };
+
+                        var openAura = http.request(options, function( response) {
+                           
+                            console.log(options.path);
+                            response.setEncoding('utf-8');
+                            //console.log(index);
+                            var responseString = '';
+
+                            response.on('data', function(data) {
+                                responseString += data;
+                            });
+                            response.on('error' , function(e){
+                                console.log(e);
+                            });
+                            response.on('end', function() {
+                                var responseObject = JSON.parse(responseString);
+                                //console.log(responseObject);
+                                var like= false;
+                                
+                                var spotifyUrl ="";
+                                if(result.spotify_track_id != null){
+                                    spotifyUrl = "<iframe src='https://embed.spotify.com/?uri="+result.spotify_track_id+"' width='250' height='80' frameborder='0' allowtransparency='true'></iframe>";
+                                }
+                                var bandsInTown = "";
+                                if(result.bands_in_town != null)
+                                    bandsInTown = result.bands_in_town;
+                                
+                                if(responseObject == ""){
+                                    
+                                timelineObjects.push({timestamp: currentTime, image: "",
+                                headline: "", links: "", isLiked: like ,
+                                spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
+                                }else{
+                                    //console.log(responseObject);
+                                timelineObjects.push({uuid : bandId, timestamp: currentTime, image: responseObject.profile_photo.media[0].url,
+                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like ,
+                                spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
+                                }
+                                
+                                    return res.send(timelineObjects);
+                                
+                                
+                            });
+                            
+                        });
+                       
+                        
+                            openAura.write("");
+                        openAura.end();
+                        
+                    }else{
+                        console.log("no result");
+                        return res.send("No band info");
+                    }
+
+                });
+            //return res.send("Visited added");
         });
 
     });
@@ -145,6 +217,8 @@ app.get('/user/:id/timeline', function(req, res) {
                         };
 
                         var openAura = http.request(options, function( response) {
+                            var delay = 1000;
+                        setTimeout(function(){},1000);
 //                            if(error){
 //                                console.log(error);
 //                                return res.send("aura error : "+ error);
@@ -197,11 +271,9 @@ app.get('/user/:id/timeline', function(req, res) {
                             
                         });
                        
-                        var delay = 1000;
-                        setTimeout(function(){
+                        
                             openAura.write("");
                         openAura.end();
-                        } , 500);
                         
                     }else{
                         console.log("no result");
@@ -222,6 +294,13 @@ function checkifBandLiked(likedList , uuid){
             return true;
     }
 }
+
+app.get('/user/:id/timeline/:uuid', function(req, res) {
+    
+    
+    
+});
+
 
 app.get('/data', function(req, res) {
     
