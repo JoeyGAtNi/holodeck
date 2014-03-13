@@ -109,24 +109,30 @@ app.get('/user/:id/timeline', function(req, res) {
             if(visitedList === null){
                 return res.status(200).send("No bands visited");
             }
-            var str="";
+            
             var bandcollection;
             for(var i=0 ; i < visitedList.length ; i++){
+                var index = 0;
+                var str="";
                 bandcollection = db.collection('bands');
-                bandcollection.findOne({"_id": "xyz1"},function(err, result) {   
+                bandcollection.findOne({"_id": visitedList[i].uuid},function(err, result) { 
+                    
+                    
                     if(err) 
                         return res.status(500).send("failed with "+err);
                     if(result != null)
                         {
                             str += result.aura_id + ",";
+                            console.log("index "+index);
+                            if(index == visitedList.length-1)
+                                return res.send("str : "+str);
                         }
-                    
+                    index++;
                 });
             }
-            console.log("result "+str)
-            return res.status(200).send(""+str);
+            //console.log("result "+str)
+            //return res.status(200).send(""+str);
         });
-
     });
 });
 
@@ -137,16 +143,22 @@ app.get('/data', function(req, res) {
             throw err;
         var bandcollection = db.collection('bands');
         var str = "";
-        bandcollection.findOne({"_id": "xyz1"},function(err, result) {  
-            console.log(result);
+        var index =0;
+        bandcollection.find().toArray(function(err, results) {  
+            
                     if(err) 
                         return res.status(500).send("failed with "+err);
+                    for(var i = 0 ; i < results.length ; i++){
+                        str += results[i].aura_id;
                         
-                            str += result.aura_id + ",";
-                        
+                        if(i == results.length-1)
+                            return res.send(str);
+                    }
+                    
+        db.close();
                     
         });
-        res.send("str = "+str);
+        //res.send("str = "+str);
     });
 });
 
