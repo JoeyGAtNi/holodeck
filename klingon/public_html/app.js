@@ -114,6 +114,7 @@ app.get('/user/:id/timeline', function(req, res) {
             for(var i=0 ; i < visitedList.length ; i++){
                 var index = 0;
                 var str="";
+                var timelineObjects = [];
                 bandcollection = db.collection('bands');
                 bandcollection.findOne({"_id": visitedList[i].uuid},function(err, result) { 
                     
@@ -122,10 +123,12 @@ app.get('/user/:id/timeline', function(req, res) {
                         return res.status(500).send("failed with "+err);
                     if(result != null)
                         {
-                            str += result.aura_id + ",";
+//                            str += result.aura_id + ",";
+                            timelineObjects.push({timestamp: visitedList[index].timestamp, image: "" , 
+                                                    headline : "" ,links :"" , isLiked: true});
                             console.log("index "+index);
                             if(index == visitedList.length-1)
-                                return res.send("str : "+str);
+                                return res.send(timelineObjects);
                         }
                     index++;
                 });
