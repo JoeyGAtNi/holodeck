@@ -51,6 +51,54 @@ app.post('/user',function(req,res){
   }); 
 });
 
+app.put('/user/:id/visited/:uuid',function(req,res){
+    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
+    var userId = req.param('id');
+    var bandId = req.param('uuid');
+    
+    if(err) throw err;
+
+    var collection = db.collection('crowd');
+        
+    collection.update(
+            {_id: userId},  
+            {
+                $addToSet : {"visited" : bandId}
+            }, function(err, records){
+        if(err){
+            return res.status(400).send("Failed");
+        }
+        return res.send("Visited added");
+    });
+    
+  }); 
+});
+
+
+app.put('/user/:id/liked/:uuid',function(req,res){
+    MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
+    var userId = req.param('id');
+    var bandId = req.param('uuid');
+    
+    if(err) throw err;
+
+    var collection = db.collection('crowd');
+        
+    collection.update(
+            {_id: userId},  
+            {
+                $addToSet : {"liked" : bandId}
+            }, function(err, records){
+        if(err){
+            return res.status(400).send("Failed");
+        }
+        return res.send("Visited added");
+    });
+    
+  }); 
+});
+
+
 
 
 
