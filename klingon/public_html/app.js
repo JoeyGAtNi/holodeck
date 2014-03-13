@@ -105,6 +105,9 @@ app.get('/user/:id/timeline', function(req, res) {
             if (err) {
                 return res.status(400).send("Failed");
             }
+            if(results == null){
+                return res.status(404).send("no band visits");
+            }
             visitedList = results.visited;
             if (visitedList === null) {
                 return res.status(200).send("No bands visited");
@@ -145,8 +148,8 @@ app.get('/user/:id/timeline', function(req, res) {
                                 var responseObject = JSON.parse(responseString);
                                 console.log(responseObject.oa_anchor_id);
 
-                                timelineObjects.push({timestamp: visitedList[index].timestamp, image: "",
-                                    headline: "", links: responseObject.oa_anchor_id, isLiked: true});
+                                timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[2].url,
+                                    headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: true});
                                 if (index == visitedList.length - 1) {
                                     //console.log(timelineObjects);
                                     return res.send(timelineObjects);
