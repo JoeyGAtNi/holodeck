@@ -199,7 +199,7 @@ app.get('/user/:id/timeline', function(req, res) {
                        
                         openAura.write("");
                         openAura.end();
-                        setTimeout(function(){} , 400);
+                        setTimeout(function(){} , 600);
                     }else{
                         console.log("no result");
                         index++;
