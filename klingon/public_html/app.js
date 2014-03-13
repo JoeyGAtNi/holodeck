@@ -98,43 +98,72 @@ app.get('/user/:id/timeline', function(req, res) {
         var userId = req.param('id');
 
         var collection = db.collection('crowd');
-        var visitedList ;
-        
-    
-        collection.findOne({"_id": userId},function(err, results) {
+        var visitedList;
+
+
+        collection.findOne({"_id": userId}, function(err, results) {
             if (err) {
                 return res.status(400).send("Failed");
             }
             visitedList = results.visited;
-            if(visitedList === null){
+            if (visitedList === null) {
                 return res.status(200).send("No bands visited");
             }
-            
+
             var bandcollection;
-            for(var i=0 ; i < visitedList.length ; i++){
-                var index = 0;
-                var str="";
+            for (var i = 0; i < visitedList.length; i++) {
+
+                var str = "";
                 var timelineObjects = [];
                 bandcollection = db.collection('bands');
-                bandcollection.findOne({"_id": visitedList[i].uuid},function(err, result) { 
-                    
-                    
-                    if(err) 
-                        return res.status(500).send("failed with "+err);
-                    if(result != null)
-                        {
-//                            str += result.aura_id + ",";
-                            timelineObjects.push({timestamp: visitedList[index].timestamp, image: "" , 
-                                                    headline : "" ,links :"" , isLiked: true});
-                            console.log("index "+index);
-                            if(index == visitedList.length-1)
-                                return res.send(timelineObjects);
-                        }
-                    index++;
+                var index = 0;
+                bandcollection.findOne({"_id": visitedList[i].uuid}, function(err, result) {
+
+                    if (err)
+                        return res.status(500).send("failed with " + err);
+                    if (result != null)
+                    {
+
+
+                        var options = {
+                            host: 'api.openaura.com',
+                            path: '/v1/info/artists/' + result.aura_id + '?id_type=oa%3Aartist_id&api_key=hack-sxsw',
+                            method: 'GET'
+                        };
+
+                        var openAura = http.request(options, function(response) {
+                            response.setEncoding('utf-8');
+                            //console.log(index);
+                            var responseString = '';
+
+                            response.on('data', function(data) {
+                                responseString += data;
+                            });
+
+                            response.on('end', function() {
+                                //console.log(responseString);
+                                var responseObject = JSON.parse(responseString);
+                                console.log(responseObject.oa_anchor_id);
+
+                                timelineObjects.push({timestamp: visitedList[index].timestamp, image: "",
+                                    headline: "", links: responseObject.oa_anchor_id, isLiked: true});
+                                if (index == visitedList.length - 1) {
+                                    //console.log(timelineObjects);
+                                    return res.send(timelineObjects);
+                                }
+                                index++;
+                                //success(responseObject);
+                            });
+                            
+                        });
+                        openAura.write("");
+                        openAura.end();
+
+                    }
+
                 });
             }
-            //console.log("result "+str)
-            //return res.status(200).send(""+str);
+
         });
     });
 });
