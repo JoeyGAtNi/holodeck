@@ -143,7 +143,7 @@ app.get('/user/:id/timeline', function(req, res) {
 
                         var openAura = http.request(options, function(err , response) {
                             if(err)
-                                return res.status(500).send("failed with " + err);
+                                return res.status(500).send("failed with " + err.message);
                             response.setEncoding('utf-8');
                             //console.log(index);
                             var responseString = '';
