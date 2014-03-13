@@ -1,0 +1,19 @@
+{
+  "name": "klingon",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+   "dependencies": {
+    "express": "3.x",
+    "socket.io": "~0.9.16",
+    "mongodb": "~1.3.23"
+  },        
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rev",
+  "license": "BSD"
+}
