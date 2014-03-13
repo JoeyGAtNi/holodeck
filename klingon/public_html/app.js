@@ -197,9 +197,12 @@ app.get('/user/:id/timeline', function(req, res) {
                             
                         });
                        
-                        openAura.write("");
+                        var delay = 1000;
+                        setTimeout(function(){
+                            openAura.write("");
                         openAura.end();
-                        setTimeout(function(){} , 600);
+                        } , 500);
+                        
                     }else{
                         console.log("no result");
                         index++;
