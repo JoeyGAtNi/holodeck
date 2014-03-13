@@ -173,6 +173,7 @@ app.get('/user/:id/timeline', function(req, res) {
                                 headline: "", links: "", isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
                                 }else{
+                                    console.log(responseObject);
                                 timelineObjects.push({timestamp: visitedList[index].timestamp, image: responseObject.profile_photo.media[0].url,
                                     headline: responseObject.name, links: responseObject.fact_card.media[0].data.website, isLiked: like ,
                                 spotify_track_id : spotifyUrl , bands_in_town : bandsInTown});
