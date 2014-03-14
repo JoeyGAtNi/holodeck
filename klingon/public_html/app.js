@@ -23,8 +23,13 @@ app.all('*', function(req, res, next) {
  });
 
 app.use(express.logger('dev'));
+
 app.get('/', function(req, res) {
-    res.sendfile(__dirname + '/index.html');
+    res.sendfile(__dirname + '/index1.html');
+});
+
+app.get('/visitors', function(req, res) {
+    res.sendfile(__dirname + '/visitor.html');
 });
 
 app.post('/user', function(req, res) {
