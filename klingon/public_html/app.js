@@ -32,6 +32,14 @@ app.get('/visitors', function(req, res) {
     res.sendfile(__dirname + '/visitor.html');
 });
 
+app.get('/songlist', function(req, res) {
+    res.sendfile(__dirname + '/songlist.html');
+});
+
+app.get('/socialmedia', function(req, res) {
+    res.sendfile(__dirname + '/socialmedia.html');
+});
+
 app.post('/user', function(req, res) {
     MongoClient.connect('mongodb://127.0.0.1:27017/holodeck', function(err, db) {
         if (err)
